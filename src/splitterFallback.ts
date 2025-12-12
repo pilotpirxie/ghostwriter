@@ -67,3 +67,4 @@ export function splitWithFallback(text: string, options: SplitOptions = {}): Spl
   const bySize = chunkBySize(normalized, maxChars);
   return { chapters: bySize, warnings };
 }
+

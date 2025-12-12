@@ -33,3 +33,4 @@ export function createSplitter(format: EbookFormat): Splitter {
       throw new Error(`No splitter for format ${format}`);
   }
 }
+

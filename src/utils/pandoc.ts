@@ -19,3 +19,4 @@ export async function convertToText(inputPath: string, pandocPath?: string): Pro
   });
   return stdout.toString();
 }
+

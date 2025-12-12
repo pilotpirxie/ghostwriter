@@ -34,3 +34,4 @@ export interface LLMClient {
   readonly name: 'openai' | 'claude';
   paraphrase(chapter: Chapter, options: ParaphraseOptions): Promise<ParaphraseResult>;
 }
+

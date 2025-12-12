@@ -16,3 +16,4 @@ export class TxtSplitter implements Splitter {
     return { ...result, warnings: [...result.warnings] };
   }
 }
+
