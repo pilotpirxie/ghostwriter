@@ -1,14 +1,14 @@
-import { Chapter, SplitOptions, SplitResult } from './types.js';
+import { Chapter, SplitOptions, SplitResult } from "./types.js";
 
 const headingRegex = /^(chapter|chap\.?|ch\.?|section)\s+([0-9ivx]+)/i;
 
 function normalizeText(text: string): string {
-  return text.replace(/\r\n/g, '\n').trim();
+  return text.replace(/\r\n/g, "\n").trim();
 }
 
 function createChunksFromHeadings(lines: string[]): Chapter[] {
   const chapters: Chapter[] = [];
-  let currentTitle = 'Introduction';
+  let currentTitle = "Introduction";
   let currentLines: string[] = [];
 
   const flush = () => {
@@ -17,7 +17,7 @@ function createChunksFromHeadings(lines: string[]): Chapter[] {
     chapters.push({
       index,
       title: currentTitle,
-      content: currentLines.join('\n').trim(),
+      content: currentLines.join("\n").trim(),
     });
     currentLines = [];
   };
@@ -52,19 +52,21 @@ function chunkBySize(text: string, maxChars: number): Chapter[] {
   return chunks;
 }
 
-export function splitWithFallback(text: string, options: SplitOptions = {}): SplitResult {
+export function splitWithFallback(
+  text: string,
+  options: SplitOptions = {},
+): SplitResult {
   const warnings: string[] = [];
   const normalized = normalizeText(text);
-  const lines = normalized.split('\n');
+  const lines = normalized.split("\n");
   const byHeading = createChunksFromHeadings(lines);
 
   if (byHeading.length > 1) {
     return { chapters: byHeading, warnings };
   }
 
-  warnings.push('Headings not detected; using size-based chunks.');
+  warnings.push("Headings not detected; using size-based chunks.");
   const maxChars = options.maxCharsPerChapter ?? 10_000;
   const bySize = chunkBySize(normalized, maxChars);
   return { chapters: bySize, warnings };
 }
-

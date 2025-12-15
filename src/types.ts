@@ -1,4 +1,4 @@
-export type EbookFormat = 'pdf' | 'epub' | 'txt';
+export type EbookFormat = "pdf" | "epub" | "txt" | "md";
 
 export interface Chapter {
   index: number;
@@ -10,6 +10,7 @@ export interface Chapter {
 export interface SplitOptions {
   pandocPath?: string;
   maxCharsPerChapter?: number;
+  mdHeadingLevel?: number;
 }
 
 export interface SplitResult {
@@ -31,7 +32,9 @@ export interface ParaphraseResult {
 }
 
 export interface LLMClient {
-  readonly name: 'openai' | 'claude';
-  paraphrase(chapter: Chapter, options: ParaphraseOptions): Promise<ParaphraseResult>;
+  readonly name: "openai" | "claude";
+  paraphrase(
+    chapter: Chapter,
+    options: ParaphraseOptions,
+  ): Promise<ParaphraseResult>;
 }
-

@@ -1,7 +1,14 @@
-import path from 'node:path';
-import { createSplitter, detectFormat } from './splitters/Splitter.js';
-import { LLMClient, SplitOptions, ParaphraseOptions, SplitResult, Chapter, EbookFormat } from './types.js';
-import { saveChapters, loadChapters, saveParaphrased } from './utils/io.js';
+import path from "node:path";
+import { createSplitter, detectFormat } from "./splitters/Splitter.js";
+import {
+  LLMClient,
+  SplitOptions,
+  ParaphraseOptions,
+  SplitResult,
+  Chapter,
+  EbookFormat,
+} from "./types.js";
+import { saveChapters, loadChapters, saveParaphrased } from "./utils/io.js";
 
 function chunkText(text: string, maxChars: number, overlap = 300): string[] {
   const chunks: string[] = [];
@@ -39,7 +46,7 @@ async function paraphraseChapter(
     outputs.push(result.output);
   }
 
-  return outputs.join('\n\n');
+  return outputs.join("\n\n");
 }
 
 export async function splitFile(
@@ -62,11 +69,9 @@ export async function paraphraseDirectory(
 ): Promise<void> {
   const chapters = await loadChapters(chaptersDir);
   for (const chapter of chapters) {
-    // Preserve hint to original chapter location in filename
     const reference = path.basename(chaptersDir);
     const chapterWithRef: Chapter = { ...chapter, reference };
     const output = await paraphraseChapter(chapterWithRef, client, options);
     await saveParaphrased(chapter.index, output, outputDir);
   }
 }
-

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node src/index.ts",
-    "lint": "tsc --noEmit",
+    "lint": "prettier . --write && tsc --noEmit",
     "prepare": "npm run build"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/node": "^22.7.4",
     "@types/pdf-parse": "^1.1.4",
+    "prettier": "3.7.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   }

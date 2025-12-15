@@ -1,22 +1,33 @@
 #!/usr/bin/env node
-import 'dotenv/config';
-import { Command } from 'commander';
-import path from 'node:path';
-import { splitFile, paraphraseDirectory } from './pipeline.js';
-import { createSplitter, detectFormat } from './splitters/Splitter.js';
-import { OpenAIClient } from './llm/openaiClient.js';
-import { ClaudeClient } from './llm/claudeClient.js';
-import { EbookFormat, LLMClient, SplitOptions, ParaphraseOptions } from './types.js';
+import "dotenv/config";
+import { Command } from "commander";
+import path from "node:path";
+import { splitFile, paraphraseDirectory } from "./pipeline.js";
+import { createSplitter, detectFormat } from "./splitters/Splitter.js";
+import { OpenAIClient } from "./llm/openaiClient.js";
+import { ClaudeClient } from "./llm/claudeClient.js";
+import {
+  EbookFormat,
+  LLMClient,
+  SplitOptions,
+  ParaphraseOptions,
+} from "./types.js";
 
 function resolvePath(p: string): string {
   return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
 }
 
-function getClient(provider: string, apiKey?: string, anthropicKey?: string): LLMClient {
-  if (provider === 'claude') {
-    return new ClaudeClient(anthropicKey || process.env.ANTHROPIC_API_KEY || '');
+function getClient(
+  provider: string,
+  apiKey?: string,
+  anthropicKey?: string,
+): LLMClient {
+  if (provider === "claude") {
+    return new ClaudeClient(
+      anthropicKey || process.env.ANTHROPIC_API_KEY || "",
+    );
   }
-  return new OpenAIClient(apiKey || process.env.OPENAI_API_KEY || '');
+  return new OpenAIClient(apiKey || process.env.OPENAI_API_KEY || "");
 }
 
 function buildParaphraseOptions(opts: any): ParaphraseOptions {
@@ -26,7 +37,7 @@ function buildParaphraseOptions(opts: any): ParaphraseOptions {
     topP: opts.topP ? Number(opts.topP) : undefined,
     maxCharsPerCall: Number(opts.maxCharsPerCall ?? 8000),
     promptHeader:
-      'You are creating a concise, engaging article that highlights this book chapter. Provide citations so readers can locate the referenced parts in the book.',
+      "You are creating a concise, engaging article that highlights this book chapter. Provide citations so readers can locate the referenced parts in the book.",
   };
 }
 
@@ -36,6 +47,9 @@ async function handleSplit(input: string, opts: any) {
   const splitOptions: SplitOptions & { format?: EbookFormat } = {
     format: opts.format as EbookFormat | undefined,
     pandocPath: opts.pandocPath,
+    mdHeadingLevel: opts.mdHeadingLevel
+      ? Number(opts.mdHeadingLevel)
+      : undefined,
   };
 
   const format = splitOptions.format ?? detectFormat(inputPath);
@@ -45,7 +59,9 @@ async function handleSplit(input: string, opts: any) {
   }
 
   const result = await splitFile(inputPath, outputDir, splitOptions);
-  console.log(`Chapters written to ${outputDir}. Total: ${result.chapters.length}`);
+  console.log(
+    `Chapters written to ${outputDir}. Total: ${result.chapters.length}`,
+  );
   if (result.warnings.length) {
     result.warnings.forEach((w) => console.warn(`Warning: ${w}`));
   }
@@ -68,22 +84,31 @@ async function handleRun(input: string, opts: any) {
 
 const program = new Command();
 program
-  .name('ghostwriter')
-  .description('Split ebooks per chapter and paraphrase with citations.')
-  .option('--api-key <key>', 'OpenAI API key')
-  .option('--anthropic-key <key>', 'Anthropic API key')
-  .option('--pandoc-path <path>', 'Path to pandoc binary')
-  .option('--max-chars-per-call <number>', 'Max characters to send per LLM call', '8000')
-  .option('--model-name <name>', 'Underlying model name', 'gpt-4o-mini')
-  .option('--temperature <number>', 'Sampling temperature', '0.4')
-  .option('--top-p <number>', 'Top-p nucleus sampling', undefined)
-  .option('--provider <provider>', 'LLM provider: openai|claude', 'openai');
+  .name("ghostwriter")
+  .description("Split ebooks per chapter and paraphrase with citations.")
+  .option("--api-key <key>", "OpenAI API key")
+  .option("--anthropic-key <key>", "Anthropic API key")
+  .option("--pandoc-path <path>", "Path to pandoc binary")
+  .option(
+    "--max-chars-per-call <number>",
+    "Max characters to send per LLM call",
+    "8000",
+  )
+  .option("--model-name <name>", "Underlying model name", "gpt-4o-mini")
+  .option("--temperature <number>", "Sampling temperature", "0.4")
+  .option("--top-p <number>", "Top-p nucleus sampling", undefined)
+  .option("--provider <provider>", "LLM provider: openai|claude", "openai");
 
 program
-  .command('split')
-  .argument('<input>', 'Input ebook path (pdf|epub|txt)')
-  .requiredOption('-o, --output <dir>', 'Directory to write chapter txt files')
-  .option('-f, --format <format>', 'Force format: pdf|epub|txt')
+  .command("split")
+  .argument("<input>", "Input ebook path (pdf|epub|txt|md)")
+  .requiredOption("-o, --output <dir>", "Directory to write chapter txt files")
+  .option("-f, --format <format>", "Force format: pdf|epub|txt|md")
+  .option(
+    "--md-heading-level <number>",
+    "Minimum markdown heading level to start a new chapter (1-6)",
+    "2",
+  )
   .action((input, options) => {
     handleSplit(input, options).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
@@ -92,9 +117,12 @@ program
   });
 
 program
-  .command('paraphrase')
-  .argument('<chaptersDir>', 'Directory containing chapter txt files')
-  .requiredOption('-o, --output <dir>', 'Directory to write paraphrased outputs')
+  .command("paraphrase")
+  .argument("<chaptersDir>", "Directory containing chapter txt files")
+  .requiredOption(
+    "-o, --output <dir>",
+    "Directory to write paraphrased outputs",
+  )
   .action((dir, options) => {
     handleParaphrase(dir, options).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
@@ -103,10 +131,10 @@ program
   });
 
 program
-  .command('run')
-  .argument('<input>', 'Input ebook path (pdf|epub|txt)')
-  .requiredOption('-o, --output <dir>', 'Output directory for both steps')
-  .option('-f, --format <format>', 'Force format: pdf|epub|txt')
+  .command("run")
+  .argument("<input>", "Input ebook path (pdf|epub|txt|md)")
+  .requiredOption("-o, --output <dir>", "Output directory for both steps")
+  .option("-f, --format <format>", "Force format: pdf|epub|txt|md")
   .action((input, options) => {
     handleRun(input, options).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
@@ -115,4 +143,3 @@ program
   });
 
 program.parse();
-
