@@ -2,6 +2,7 @@ import { Splitter } from './Splitter.js';
 import { Chapter, SplitOptions, SplitResult } from '../types.js';
 import { splitWithFallback } from '../splitterFallback.js';
 import { convertToText } from '../utils/pandoc.js';
+import {EPub} from 'epub2';
 
 function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -9,9 +10,7 @@ function stripHtml(html: string): string {
 
 async function tryEpub2Extraction(filePath: string): Promise<Chapter[] | null> {
   try {
-    const module = await import('epub2');
-    const Epub: any = (module as any).default ?? (module as any);
-    const epub = new Epub(filePath);
+    const epub = new EPub(filePath);
 
     await new Promise<void>((resolve, reject) => {
       epub.on('error', reject);
@@ -26,9 +25,9 @@ async function tryEpub2Extraction(filePath: string): Promise<Chapter[] | null> {
       const item = flow[i];
       const title = item?.title || item?.id || `Chapter ${i + 1}`;
       const content: string = await new Promise((resolve, reject) => {
-        epub.getChapter(item.id, (err: Error, text: string) => {
+        epub.getChapter(item.id, (err: Error, text?: string) => {
           if (err) reject(err);
-          else resolve(text);
+          else resolve(text ?? '');
         });
       });
       chapters.push({ index: i, title, content: stripHtml(content) });
@@ -57,6 +56,7 @@ export class EpubSplitter implements Splitter {
     }
 
     warnings.push('Falling back to pandoc for epub text extraction.');
+    console.log('Falling back to pandoc for epub text extraction.');
     const text = await convertToText(filePath, options.pandocPath);
     const result = splitWithFallback(text, options);
     return { ...result, warnings: [...warnings, ...result.warnings] };

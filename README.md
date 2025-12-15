@@ -20,7 +20,7 @@ npx ghostwriter run <input> -o <output-dir> --provider openai --model-name gpt-4
 
 Split only:
 ```bash
-npx ghostwriter split <input> -o <chapters-dir> [--format pdf|epub|mobi|txt] [--pandoc-path /usr/local/bin/pandoc]
+npx ghostwriter split <input> -o <chapters-dir> [--format pdf|epub|txt] [--pandoc-path /usr/local/bin/pandoc]
 ```
 
 Paraphrase an existing chapters directory:

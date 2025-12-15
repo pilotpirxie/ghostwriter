@@ -81,9 +81,9 @@ program
 
 program
   .command('split')
-  .argument('<input>', 'Input ebook path (pdf|epub|mobi|txt)')
+  .argument('<input>', 'Input ebook path (pdf|epub|txt)')
   .requiredOption('-o, --output <dir>', 'Directory to write chapter txt files')
-  .option('-f, --format <format>', 'Force format: pdf|epub|mobi|txt')
+  .option('-f, --format <format>', 'Force format: pdf|epub|txt')
   .action((input, options) => {
     handleSplit(input, options).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
@@ -104,9 +104,9 @@ program
 
 program
   .command('run')
-  .argument('<input>', 'Input ebook path (pdf|epub|mobi|txt)')
+  .argument('<input>', 'Input ebook path (pdf|epub|txt)')
   .requiredOption('-o, --output <dir>', 'Output directory for both steps')
-  .option('-f, --format <format>', 'Force format: pdf|epub|mobi|txt')
+  .option('-f, --format <format>', 'Force format: pdf|epub|txt')
   .action((input, options) => {
     handleRun(input, options).catch((err) => {
       console.error(err instanceof Error ? err.message : err);

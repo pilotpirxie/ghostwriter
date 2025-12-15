@@ -2,7 +2,6 @@ import path from 'node:path';
 import { EbookFormat, SplitOptions, SplitResult } from '../types.js';
 import { PdfSplitter } from './pdfSplitter.js';
 import { EpubSplitter } from './epubSplitter.js';
-import { MobiSplitter } from './mobiSplitter.js';
 import { TxtSplitter } from './txtSplitter.js';
 
 export interface Splitter {
@@ -13,10 +12,10 @@ export interface Splitter {
 
 export function detectFormat(filePath: string): EbookFormat {
   const ext = path.extname(filePath).toLowerCase().replace('.', '');
-  if (ext === 'pdf' || ext === 'epub' || ext === 'mobi' || ext === 'txt') {
+  if (ext === 'pdf' || ext === 'epub' || ext === 'txt') {
     return ext as EbookFormat;
   }
-  throw new Error(`Unsupported format for ${filePath}. Expected pdf, epub, mobi, or txt.`);
+  throw new Error(`Unsupported format for ${filePath}. Expected pdf, epub, or txt.`);
 }
 
 export function createSplitter(format: EbookFormat): Splitter {
@@ -25,8 +24,6 @@ export function createSplitter(format: EbookFormat): Splitter {
       return new PdfSplitter();
     case 'epub':
       return new EpubSplitter();
-    case 'mobi':
-      return new MobiSplitter();
     case 'txt':
       return new TxtSplitter();
     default:

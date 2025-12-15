@@ -1,4 +1,4 @@
-export type EbookFormat = 'pdf' | 'epub' | 'mobi' | 'txt';
+export type EbookFormat = 'pdf' | 'epub' | 'txt';
 
 export interface Chapter {
   index: number;
