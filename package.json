@@ -1,6 +1,6 @@
 {
   "name": "@pilotpirxie/ghostwriter",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI to split ebooks into chapters and paraphrase with citations.",
   "author": "pilotpirxie",
   "license": "MIT",
