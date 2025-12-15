@@ -1,6 +1,6 @@
 {
   "name": "@pilotpirxie/ghostwriter",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "CLI to split ebooks into chapters and paraphrase with citations.",
   "repository": "https://github.com/pilotpirxie/ghostwriter.git",
   "author": "pilotpirxie <10637666+pilotpirxie@users.noreply.github.com>",
@@ -25,8 +25,7 @@
   "main": "dist/index.js",
   "types": "dist/types.d.ts",
   "bin": {
-    "ghostwriter": "dist/index.js",
-    "@pilotpirxie/ghostwriter": "dist/index.js"
+    "ghostwriter": "dist/index.js"
   },
   "files": [
     "dist/**/*",
