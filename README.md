@@ -7,7 +7,7 @@ Supports PDF, EPUB, Markdown, and TXT formats. Works with OpenAI and Claude.
 ## Quick Start
 
 ```bash
-npx ghostwriter --provider claude --api-key YOUR_KEY run book.pdf -o output
+npx @pilotpirxie/ghostwriter --provider claude --api-key YOUR_KEY run book.pdf -o output
 ```
 
 ## Requirements
@@ -22,13 +22,13 @@ Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable, or use `--api-
 
 ```sh
 # split and process ebook in one step.
-npx ghostwriter run book.pdf -o output
+npx @pilotpirxie/ghostwriter run book.pdf -o output
 
 # split ebook into chapters without AI processing
-npx ghostwriter split book.epub -o chapters
+npx @pilotpirxie/ghostwriter split book.epub -o chapters
 
 # process pre-split chapter files with AI
-npx ghostwriter paraphrase chapters/ -o processed
+npx @pilotpirxie/ghostwriter paraphrase chapters/ -o processed
 ```
 
 ## Options
@@ -51,22 +51,22 @@ npx ghostwriter paraphrase chapters/ -o processed
 
 Summarize chapters:
 ```bash
-npx ghostwriter --prompt-header "Summarize in 3 bullet points" run book.pdf -o summaries
+npx @pilotpirxie/ghostwriter --prompt-header "Summarize in 3 bullet points" run book.pdf -o summaries
 ```
 
 Translate to Spanish:
 ```bash
-npx ghostwriter --prompt-header "Translate to Spanish" run book.epub -o spanish
+npx @pilotpirxie/ghostwriter --prompt-header "Translate to Spanish" run book.epub -o spanish
 ```
 
 Custom style:
 ```bash
-npx ghostwriter --prompt-header "Rewrite as a pirate" run story.pdf -o pirate-version
+npx @pilotpirxie/ghostwriter --prompt-header "Rewrite as a pirate" run story.pdf -o pirate-version
 ```
 
 Minion style using Claude:
 ```bash
-npx ghostwriter --provider claude --prompt-header "Rewrite the chapter using minions from Despicable me style" run book.epub -o output
+npx @pilotpirxie/ghostwriter --provider claude --prompt-header "Rewrite the chapter using minions from Despicable me style" run book.epub -o output
 ```
 
 ## License

@@ -1,7 +1,17 @@
 {
   "name": "@pilotpirxie/ghostwriter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI to split ebooks into chapters and paraphrase with citations.",
+  "author": "pilotpirxie",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pilotpirxie/ghostwriter.git"
+  },
+  "homepage": "https://github.com/pilotpirxie/ghostwriter#readme",
+  "bugs": {
+    "url": "https://github.com/pilotpirxie/ghostwriter/issues"
+  },
   "keywords": [
     "cli",
     "ebook",
@@ -25,7 +35,7 @@
     "ghostwriter": "dist/index.js"
   },
   "files": [
-    "dist",
+    "dist/**/*",
     "README.md",
     "LICENSE"
   ],
