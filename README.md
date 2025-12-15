@@ -1,4 +1,4 @@
-# Ghostwriter
+# ghostwriter
 
 TypeScript CLI tool for splitting ebooks and processing chapters with LLMs.
 
@@ -71,4 +71,4 @@ npx @pilotpirxie/ghostwriter --provider claude --prompt-header "Rewrite the chap
 
 ## License
 
-MIT - see [LICENSE](LICENSE) file.
+MIT
