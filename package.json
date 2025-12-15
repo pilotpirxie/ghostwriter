@@ -1,10 +1,36 @@
 {
-  "name": "ghostwriter",
-  "version": "0.1.0",
+  "name": "@pilotpirxie/ghostwriter",
+  "version": "1.0.1",
   "description": "CLI to split ebooks into chapters and paraphrase with citations.",
+  "keywords": [
+    "cli",
+    "ebook",
+    "pdf",
+    "epub",
+    "markdown",
+    "ai",
+    "openai",
+    "claude",
+    "llm",
+    "text-processing",
+    "chapter-splitting",
+    "paraphrase",
+    "citations",
+    "writing-assistant"
+  ],
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/types.d.ts",
   "bin": {
     "ghostwriter": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
