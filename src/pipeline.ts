@@ -1,4 +1,4 @@
-import path from "node:path";
+import fs from "node:fs/promises";
 import { createSplitter, detectFormat } from "./splitters/Splitter.js";
 import {
   LLMClient,
@@ -10,18 +10,52 @@ import {
 } from "./types.js";
 import { saveChapters, loadChapters, saveParaphrased } from "./utils/io.js";
 
-function chunkText(text: string, maxChars: number, overlap = 300): string[] {
+async function validateInputFile(filePath: string): Promise<void> {
+  try {
+    const stats = await fs.stat(filePath);
+    if (!stats.isFile()) {
+      throw new Error(`Path is not a file: ${filePath}`);
+    }
+    if (stats.size === 0) {
+      throw new Error(`File is empty: ${filePath}`);
+    }
+  } catch (error: any) {
+    if (error.code === "ENOENT") {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    if (error.code === "EACCES") {
+      throw new Error(`Permission denied: ${filePath}`);
+    }
+    throw error;
+  }
+}
+
+const MIN_CHUNK_SIZE = 2000;
+const DEFAULT_OVERLAP = 300;
+const MIN_CHAPTER_LENGTH_FOR_LLM = 80;
+
+function chunkText(
+  text: string,
+  maxChars: number,
+  overlap = DEFAULT_OVERLAP,
+): string[] {
   const chunks: string[] = [];
-  const safeMax = Math.max(maxChars, 2000);
+  const safeMax = Math.max(maxChars, MIN_CHUNK_SIZE);
+  const safeOverlap = Math.min(overlap, Math.floor(safeMax * 0.5));
   let start = 0;
 
   while (start < text.length) {
-    const end = start + safeMax;
+    const end = Math.min(start + safeMax, text.length);
     const slice = text.slice(start, end);
     chunks.push(slice.trim());
-    start = end - overlap;
+    start = end - safeOverlap;
+
+    if (end === text.length) break;
+    if (start >= end - safeOverlap) {
+      start = end;
+    }
   }
-  return chunks;
+  return chunks.filter((c) => c.length > 0);
 }
 
 async function paraphraseChapter(
@@ -29,6 +63,16 @@ async function paraphraseChapter(
   client: LLMClient,
   options: ParaphraseOptions,
 ): Promise<string> {
+  const trimmed = chapter.content.trim();
+
+  if (trimmed.length === 0) {
+    return "";
+  }
+
+  if (trimmed.length < MIN_CHAPTER_LENGTH_FOR_LLM) {
+    return trimmed;
+  }
+
   if (chapter.content.length <= options.maxCharsPerCall) {
     const result = await client.paraphrase(chapter, options);
     return result.output;
@@ -54,6 +98,7 @@ export async function splitFile(
   outputDir: string,
   options: SplitOptions & { format?: EbookFormat },
 ): Promise<SplitResult> {
+  await validateInputFile(inputPath);
   const format = options.format ?? detectFormat(inputPath);
   const splitter = createSplitter(format);
   const splitResult = await splitter.split(inputPath, options);
@@ -68,10 +113,24 @@ export async function paraphraseDirectory(
   options: ParaphraseOptions,
 ): Promise<void> {
   const chapters = await loadChapters(chaptersDir);
-  for (const chapter of chapters) {
-    const reference = path.basename(chaptersDir);
-    const chapterWithRef: Chapter = { ...chapter, reference };
-    const output = await paraphraseChapter(chapterWithRef, client, options);
+  const total = chapters.length;
+  console.log(
+    `Starting paraphrase of ${total} chapter(s) from ${chaptersDir} into ${outputDir}...`,
+  );
+
+  for (let i = 0; i < total; i += 1) {
+    const chapter = chapters[i];
+    console.log(
+      `Paraphrasing chapter ${i + 1}/${total}: "${chapter.title}" (index ${
+        chapter.index
+      })`,
+    );
+    const output = await paraphraseChapter(chapter, client, options);
     await saveParaphrased(chapter.index, output, outputDir);
+    console.log(
+      `Finished chapter ${i + 1}/${total}: wrote chapter-${String(
+        chapter.index + 1,
+      ).padStart(2, "0")}.out.txt`,
+    );
   }
 }

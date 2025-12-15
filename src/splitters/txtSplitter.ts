@@ -13,7 +13,6 @@ export class TxtSplitter implements Splitter {
 
   async split(filePath: string, options: SplitOptions): Promise<SplitResult> {
     const raw = await fs.readFile(filePath, "utf8");
-    const result = splitWithFallback(raw, options);
-    return { ...result, warnings: [...result.warnings] };
+    return splitWithFallback(raw, options);
   }
 }

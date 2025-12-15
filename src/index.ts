@@ -3,7 +3,6 @@ import "dotenv/config";
 import { Command } from "commander";
 import path from "node:path";
 import { splitFile, paraphraseDirectory } from "./pipeline.js";
-import { createSplitter, detectFormat } from "./splitters/Splitter.js";
 import { OpenAIClient } from "./llm/openaiClient.js";
 import { ClaudeClient } from "./llm/claudeClient.js";
 import {
@@ -17,27 +16,28 @@ function resolvePath(p: string): string {
   return path.isAbsolute(p) ? p : path.join(process.cwd(), p);
 }
 
-function getClient(
-  provider: string,
-  apiKey?: string,
-  anthropicKey?: string,
-): LLMClient {
+function getClient(provider: string, apiKey?: string): LLMClient {
   if (provider === "claude") {
-    return new ClaudeClient(
-      anthropicKey || process.env.ANTHROPIC_API_KEY || "",
-    );
+    const resolvedKey = apiKey || process.env.ANTHROPIC_API_KEY || "";
+    return new ClaudeClient(resolvedKey);
   }
-  return new OpenAIClient(apiKey || process.env.OPENAI_API_KEY || "");
+  const resolvedKey = apiKey || process.env.OPENAI_API_KEY || "";
+  return new OpenAIClient(resolvedKey);
 }
 
 function buildParaphraseOptions(opts: any): ParaphraseOptions {
+  const provider = opts.provider || "openai";
+  const model = opts.modelName || (provider === "claude" ? "claude-3-haiku-20240307" : "gpt-4o-mini");
+
   return {
-    model: opts.modelName,
+    model,
     temperature: Number(opts.temperature ?? 0.4),
     topP: opts.topP ? Number(opts.topP) : undefined,
     maxCharsPerCall: Number(opts.maxCharsPerCall ?? 8000),
+    maxTokens: opts.maxTokens ? Number(opts.maxTokens) : undefined,
     promptHeader:
-      "You are creating a concise, engaging article that highlights this book chapter. Provide citations so readers can locate the referenced parts in the book.",
+      opts.promptHeader ??
+      "You are writer assistant that helps the user to summarize and paraphrase the provided content. Do not invent details that are not supported by the chapter. If you answer to academic or analytical content, refer to specific parts, include simple inline references (for example: page or section numbers). Follow the content's style, tone and language.",
   };
 }
 
@@ -52,12 +52,6 @@ async function handleSplit(input: string, opts: any) {
       : undefined,
   };
 
-  const format = splitOptions.format ?? detectFormat(inputPath);
-  const splitter = createSplitter(format);
-  if (!splitter.canHandle(inputPath)) {
-    throw new Error(`Splitter for ${format} cannot handle file: ${inputPath}`);
-  }
-
   const result = await splitFile(inputPath, outputDir, splitOptions);
   console.log(
     `Chapters written to ${outputDir}. Total: ${result.chapters.length}`,
@@ -70,7 +64,7 @@ async function handleSplit(input: string, opts: any) {
 async function handleParaphrase(inputDir: string, opts: any) {
   const chaptersDir = resolvePath(inputDir);
   const outputDir = resolvePath(opts.output);
-  const client = getClient(opts.provider, opts.apiKey, opts.anthropicKey);
+  const client = getClient(opts.provider, opts.apiKey);
   const paraphraseOpts = buildParaphraseOptions(opts);
   await paraphraseDirectory(chaptersDir, outputDir, client, paraphraseOpts);
   console.log(`Paraphrased files written to ${outputDir}`);
@@ -86,13 +80,24 @@ const program = new Command();
 program
   .name("ghostwriter")
   .description("Split ebooks per chapter and paraphrase with citations.")
-  .option("--api-key <key>", "OpenAI API key")
-  .option("--anthropic-key <key>", "Anthropic API key")
+  .option(
+    "--api-key <key>",
+    "API key for the selected provider (OPENAI_API_KEY or ANTHROPIC_API_KEY env var)",
+  )
   .option("--pandoc-path <path>", "Path to pandoc binary")
+  .option(
+    "--prompt-header <text>",
+    "Custom instruction/prompt used to guide the paraphrased output",
+  )
   .option(
     "--max-chars-per-call <number>",
     "Max characters to send per LLM call",
     "8000",
+  )
+  .option(
+    "--max-tokens <number>",
+    "Maximum tokens to generate per LLM call",
+    undefined,
   )
   .option("--model-name <name>", "Underlying model name", "gpt-4o-mini")
   .option("--temperature <number>", "Sampling temperature", "0.4")
@@ -110,7 +115,9 @@ program
     "2",
   )
   .action((input, options) => {
-    handleSplit(input, options).catch((err) => {
+    const globalOptions = program.opts();
+    const merged = { ...globalOptions, ...options };
+    handleSplit(input, merged).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
       process.exitCode = 1;
     });
@@ -124,7 +131,9 @@ program
     "Directory to write paraphrased outputs",
   )
   .action((dir, options) => {
-    handleParaphrase(dir, options).catch((err) => {
+    const globalOptions = program.opts();
+    const merged = { ...globalOptions, ...options };
+    handleParaphrase(dir, merged).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
       process.exitCode = 1;
     });
@@ -136,7 +145,9 @@ program
   .requiredOption("-o, --output <dir>", "Output directory for both steps")
   .option("-f, --format <format>", "Force format: pdf|epub|txt|md")
   .action((input, options) => {
-    handleRun(input, options).catch((err) => {
+    const globalOptions = program.opts();
+    const merged = { ...globalOptions, ...options };
+    handleRun(input, merged).catch((err) => {
       console.error(err instanceof Error ? err.message : err);
       process.exitCode = 1;
     });

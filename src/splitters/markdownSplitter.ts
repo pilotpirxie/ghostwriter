@@ -5,7 +5,7 @@ import { splitWithFallback } from "../splitterFallback.js";
 
 function splitMarkdownByHeadings(
   text: string,
-  headingLevel: number = 1,
+  headingLevel: number = 2,
 ): Chapter[] {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const chapters: Chapter[] = [];
@@ -57,7 +57,7 @@ export class MarkdownSplitter implements Splitter {
       options.mdHeadingLevel >= 1 &&
       options.mdHeadingLevel <= 6
         ? options.mdHeadingLevel
-        : 1;
+        : 2;
 
     const markdownChapters = splitMarkdownByHeadings(raw, headingLevel);
 

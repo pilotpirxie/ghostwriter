@@ -1,47 +1,74 @@
-# ghostwriter
+# Ghostwriter
 
-Simple TypeScript CLI to split ebooks into per-chapter text files and paraphrase each chapter with citations using OpenAI or Claude.
+TypeScript CLI tool for splitting ebooks and processing chapters with LLMs.
 
-## Prerequisites
+Supports PDF, EPUB, Markdown, and TXT formats. Works with OpenAI and Claude.
+
+## Quick Start
+
+```bash
+npx ghostwriter --provider claude --api-key YOUR_KEY run book.pdf -o output
+```
+
+## Requirements
 
 - Node.js 18+
-- Pandoc (optional; required for `.mobi` and as fallback for `.epub` / `.pdf`)
-- API keys as needed: `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+- OpenAI or Anthropic API key
+- Pandoc (optional, improves EPUB/PDF parsing)
 
-## Install
+Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable, or use `--api-key` flag.
 
-```bash
-npm install
+## Commands
+
+```sh
+# split and process ebook in one step.
+npx ghostwriter run book.pdf -o output
+
+# split ebook into chapters without AI processing
+npx ghostwriter split book.epub -o chapters
+
+# process pre-split chapter files with AI
+npx ghostwriter paraphrase chapters/ -o processed
 ```
 
-## Usage
+## Options
 
-Run with npx (after install or via `npm link`):
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--provider <name>` | AI provider: `openai` or `claude` | `openai` |
+| `--model-name <name>` | Model identifier | `gpt-4o-mini` (OpenAI) or `claude-3-haiku-20240307` (Claude) |
+| `--api-key <key>` | API key | - |
+| `--prompt-header <text>` | Custom instruction for AI | Default paraphrase |
+| `--temperature <n>` | Sampling temperature (0-2) | `0.4` |
+| `--max-tokens <n>` | Max tokens per call | `1200` (Claude) |
+| `--max-chars-per-call <n>` | Max input chars per call | `8000` |
+| `-f, --format <format>` | Force format: `pdf`\|`epub`\|`txt`\|`md` | Auto-detect |
+| `--md-heading-level <1-6>` | Markdown heading level for splits | `2` |
+| `--pandoc-path <path>` | Custom pandoc binary path | `pandoc` |
+| `--top-p <n>` | Nucleus sampling parameter | - |
 
+## Examples
+
+Summarize chapters:
 ```bash
-npx ghostwriter run <input> -o <output-dir> --provider openai --model-name gpt-4o-mini
+npx ghostwriter --prompt-header "Summarize in 3 bullet points" run book.pdf -o summaries
 ```
 
-Split only:
-
+Translate to Spanish:
 ```bash
-npx ghostwriter split <input> -o <chapters-dir> [--format pdf|epub|txt|md] [--pandoc-path /usr/local/bin/pandoc]
+npx ghostwriter --prompt-header "Translate to Spanish" run book.epub -o spanish
 ```
 
-Paraphrase an existing chapters directory:
-
+Custom style:
 ```bash
-npx ghostwriter paraphrase <chapters-dir> -o <output-dir> --provider claude --model-name claude-3-haiku-20240307
+npx ghostwriter --prompt-header "Rewrite as a pirate" run story.pdf -o pirate-version
 ```
 
-Key flags:
+Minion style using Claude:
+```bash
+npx ghostwriter --provider claude --prompt-header "Rewrite the chapter using minions from Despicable me style" run book.epub -o output
+```
 
-- `--provider openai|claude` and `--model-name <model>` select the LLM.
-- `--max-chars-per-call <n>` guardrail for large chapters (defaults to 8000 chars).
-- `--pandoc-path <path>` to point at a custom pandoc binary.
-- `--temperature`, `--top-p` tune sampling.
+## License
 
-Outputs:
-
-- Chapters are saved as `chapter-XX.txt`.
-- Paraphrased articles are saved as `chapter-XX.out.txt` with references and call-to-action text.
+MIT - see [LICENSE](LICENSE) file.

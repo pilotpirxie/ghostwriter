@@ -7,6 +7,8 @@ import {
   ParaphraseResult,
 } from "../types.js";
 
+const DEFAULT_MAX_TOKENS = 1200;
+
 export class ClaudeClient implements LLMClient {
   readonly name = "claude" as const;
   private client: Anthropic;
@@ -14,7 +16,7 @@ export class ClaudeClient implements LLMClient {
   constructor(apiKey: string) {
     if (!apiKey) {
       throw new Error(
-        "Anthropic API key is required. Provide via --anthropic-key or ANTHROPIC_API_KEY.",
+        "API key is required for Claude. Provide via --api-key or ANTHROPIC_API_KEY.",
       );
     }
     this.client = new Anthropic({ apiKey });
@@ -27,7 +29,7 @@ export class ClaudeClient implements LLMClient {
     const prompt = buildPrompt(options.promptHeader, chapter);
     const response = await this.client.messages.create({
       model: options.model,
-      max_tokens: 1200,
+      max_tokens: options.maxTokens ?? DEFAULT_MAX_TOKENS,
       temperature: options.temperature,
       messages: [{ role: "user", content: prompt }],
     });

@@ -11,7 +11,9 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-async function tryEpub2Extraction(filePath: string): Promise<Chapter[] | null> {
+async function tryEpub2Extraction(
+  filePath: string,
+): Promise<{ chapters: Chapter[] | null; error?: string }> {
   try {
     const epub = new EPub(filePath);
 
@@ -38,10 +40,15 @@ async function tryEpub2Extraction(filePath: string): Promise<Chapter[] | null> {
       chapters.push({ index: i, title, content: stripHtml(content) });
     }
 
-    if (chapters.length === 0) return null;
-    return chapters;
-  } catch {
-    return null;
+    if (chapters.length === 0) {
+      return { chapters: null, error: "No chapters found in EPUB" };
+    }
+    return { chapters };
+  } catch (error) {
+    return {
+      chapters: null,
+      error: `epub2 extraction failed: ${(error as Error).message}`,
+    };
   }
 }
 
@@ -54,12 +61,15 @@ export class EpubSplitter implements Splitter {
 
   async split(filePath: string, options: SplitOptions): Promise<SplitResult> {
     const warnings: string[] = [];
-    const epubChapters = await tryEpub2Extraction(filePath);
+    const extractionResult = await tryEpub2Extraction(filePath);
 
-    if (epubChapters && epubChapters.length > 0) {
-      return { chapters: epubChapters, warnings };
+    if (extractionResult.chapters && extractionResult.chapters.length > 0) {
+      return { chapters: extractionResult.chapters, warnings };
     }
 
+    if (extractionResult.error) {
+      warnings.push(extractionResult.error);
+    }
     warnings.push("Falling back to pandoc for epub text extraction.");
     const text = await convertToText(filePath, options.pandocPath);
     const result = splitWithFallback(text, options);

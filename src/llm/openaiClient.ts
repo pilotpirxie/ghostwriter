@@ -14,7 +14,7 @@ export class OpenAIClient implements LLMClient {
   constructor(apiKey: string) {
     if (!apiKey) {
       throw new Error(
-        "OpenAI API key is required. Provide via --api-key or OPENAI_API_KEY.",
+        "API key is required for OpenAI. Provide via --api-key or OPENAI_API_KEY.",
       );
     }
     this.client = new OpenAI({ apiKey });
@@ -30,6 +30,7 @@ export class OpenAIClient implements LLMClient {
       messages: [{ role: "user", content: prompt }],
       temperature: options.temperature,
       top_p: options.topP,
+      max_tokens: options.maxTokens,
     });
 
     const output = response.choices?.[0]?.message?.content ?? "";

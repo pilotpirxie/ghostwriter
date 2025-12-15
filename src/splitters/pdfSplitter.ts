@@ -26,7 +26,7 @@ export class PdfSplitter implements Splitter {
       );
     }
 
-    if (!text) {
+    if (!text || text.trim().length === 0) {
       text = await convertToText(filePath, options.pandocPath);
       warnings.push("Used pandoc to extract text from PDF.");
     }

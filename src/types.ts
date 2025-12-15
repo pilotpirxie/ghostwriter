@@ -4,7 +4,6 @@ export interface Chapter {
   index: number;
   title: string;
   content: string;
-  reference?: string;
 }
 
 export interface SplitOptions {
@@ -24,11 +23,11 @@ export interface ParaphraseOptions {
   topP?: number;
   maxCharsPerCall: number;
   promptHeader: string;
+  maxTokens?: number;
 }
 
 export interface ParaphraseResult {
   output: string;
-  tokensUsed?: number;
 }
 
 export interface LLMClient {
