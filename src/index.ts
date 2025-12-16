@@ -27,7 +27,9 @@ function getClient(provider: string, apiKey?: string): LLMClient {
 
 function buildParaphraseOptions(opts: any): ParaphraseOptions {
   const provider = opts.provider || "openai";
-  const model = opts.modelName || (provider === "claude" ? "claude-3-haiku-20240307" : "gpt-4o-mini");
+  const model =
+    opts.modelName ||
+    (provider === "claude" ? "claude-3-haiku-20240307" : "gpt-4o-mini");
 
   return {
     model,
@@ -53,12 +55,9 @@ async function handleSplit(input: string, opts: any) {
   };
 
   const result = await splitFile(inputPath, outputDir, splitOptions);
-  console.log(
+  console.info(
     `Chapters written to ${outputDir}. Total: ${result.chapters.length}`,
   );
-  if (result.warnings.length) {
-    result.warnings.forEach((w) => console.warn(`Warning: ${w}`));
-  }
 }
 
 async function handleParaphrase(inputDir: string, opts: any) {
@@ -67,7 +66,7 @@ async function handleParaphrase(inputDir: string, opts: any) {
   const client = getClient(opts.provider, opts.apiKey);
   const paraphraseOpts = buildParaphraseOptions(opts);
   await paraphraseDirectory(chaptersDir, outputDir, client, paraphraseOpts);
-  console.log(`Paraphrased files written to ${outputDir}`);
+  console.info(`Paraphrased files written to ${outputDir}`);
 }
 
 async function handleRun(input: string, opts: any) {

@@ -10,16 +10,15 @@ import {
 const DEFAULT_MAX_TOKENS = 1200;
 
 export class ClaudeClient implements LLMClient {
-  readonly name = "claude" as const;
+  readonly name = "claude";
   private client: Anthropic;
 
-  constructor(apiKey: string) {
-    if (!apiKey) {
+  constructor(apiKey: string, client?: Anthropic) {
+    if (!apiKey && !client)
       throw new Error(
         "API key is required for Claude. Provide via --api-key or ANTHROPIC_API_KEY.",
       );
-    }
-    this.client = new Anthropic({ apiKey });
+    this.client = client || new Anthropic({ apiKey });
   }
 
   async paraphrase(

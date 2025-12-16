@@ -1,17 +1,16 @@
 import fs from "node:fs/promises";
 import { Splitter } from "./Splitter.js";
 import { SplitOptions, SplitResult } from "../types.js";
-import { splitWithFallback } from "../splitterFallback.js";
+import { splitWithFallback } from "../utils/splitterFallback.js";
 
 export class TxtSplitter implements Splitter {
-  readonly format = "txt" as const;
+  readonly format = "txt";
 
   canHandle(filePath: string): boolean {
-    const lower = filePath.toLowerCase();
-    return lower.endsWith(".txt");
+    return filePath.toLowerCase().endsWith(".txt");
   }
 
-  async split(filePath: string, options: SplitOptions): Promise<SplitResult> {
+  async split(filePath: string, options: SplitOptions) {
     const raw = await fs.readFile(filePath, "utf8");
     return splitWithFallback(raw, options);
   }

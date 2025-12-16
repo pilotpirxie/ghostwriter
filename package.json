@@ -7,18 +7,16 @@
   "license": "MIT",
   "keywords": [
     "cli",
-    "ebook",
-    "pdf",
+    "summarization",
     "epub",
+    "pdf",
     "markdown",
-    "ai",
-    "openai",
-    "claude",
-    "llm",
-    "text-processing",
-    "chapter-splitting",
+    "txt",
+    "md",
+    "ebook",
+    "split",
     "paraphrase",
-    "citations",
+    "text-processing",
     "writing-assistant"
   ],
   "type": "module",
@@ -38,6 +36,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "ts-node src/index.ts",
+    "test": "time tsc --noEmit && node --import tsx --test --experimental-test-coverage **/**/*.spec.ts",
     "lint": "prettier . --check && tsc --noEmit",
     "fix": "prettier . --write",
     "prepare": "npm run build && chmod +x dist/index.js"
@@ -55,6 +54,10 @@
     "@types/pdf-parse": "^1.1.4",
     "prettier": "3.7.4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

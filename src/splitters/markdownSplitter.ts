@@ -1,12 +1,9 @@
 import fs from "node:fs/promises";
 import { Splitter } from "./Splitter.js";
 import { Chapter, SplitOptions, SplitResult } from "../types.js";
-import { splitWithFallback } from "../splitterFallback.js";
+import { splitWithFallback } from "../utils/splitterFallback.js";
 
-function splitMarkdownByHeadings(
-  text: string,
-  headingLevel: number = 2,
-): Chapter[] {
+function splitMarkdownByHeadings(text: string, headingLevel = 2) {
   const lines = text.replace(/\r\n/g, "\n").split("\n");
   const chapters: Chapter[] = [];
   let currentTitle = "Introduction";
@@ -43,14 +40,16 @@ function splitMarkdownByHeadings(
 }
 
 export class MarkdownSplitter implements Splitter {
-  readonly format = "md" as const;
+  readonly format = "md";
 
   canHandle(filePath: string): boolean {
-    const lower = filePath.toLowerCase();
-    return lower.endsWith(".md") || lower.endsWith(".markdown");
+    return (
+      filePath.toLowerCase().endsWith(".md") ||
+      filePath.toLowerCase().endsWith(".markdown")
+    );
   }
 
-  async split(filePath: string, options: SplitOptions): Promise<SplitResult> {
+  async split(filePath: string, options: SplitOptions) {
     const raw = await fs.readFile(filePath, "utf8");
     const headingLevel =
       options.mdHeadingLevel &&
@@ -59,11 +58,8 @@ export class MarkdownSplitter implements Splitter {
         ? options.mdHeadingLevel
         : 2;
 
-    const markdownChapters = splitMarkdownByHeadings(raw, headingLevel);
-
-    if (markdownChapters.length > 1) {
-      return { chapters: markdownChapters, warnings: [] };
-    }
+    const chapters = splitMarkdownByHeadings(raw, headingLevel);
+    if (chapters.length > 1) return { chapters, warnings: [] };
 
     const fallback = splitWithFallback(raw, options);
     return {

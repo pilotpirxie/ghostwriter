@@ -8,16 +8,15 @@ import {
 import { buildPrompt } from "../utils/prompt.js";
 
 export class OpenAIClient implements LLMClient {
-  readonly name = "openai" as const;
+  readonly name = "openai";
   private client: OpenAI;
 
-  constructor(apiKey: string) {
-    if (!apiKey) {
+  constructor(apiKey: string, client?: OpenAI) {
+    if (!apiKey && !client)
       throw new Error(
         "API key is required for OpenAI. Provide via --api-key or OPENAI_API_KEY.",
       );
-    }
-    this.client = new OpenAI({ apiKey });
+    this.client = client || new OpenAI({ apiKey });
   }
 
   async paraphrase(
